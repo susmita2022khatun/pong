@@ -37,10 +37,11 @@ var ballSpeedX = 5;
 var ballSpeedY = 5;
 
 // Define paddle properties
-var paddleHeight = 80;
+var paddleHeightleft = 80;
+var paddleHeightright = 80;
 var paddleWidth = 10;
-var leftPaddleY = canvas.height / 2 - paddleHeight / 2;
-var rightPaddleY = canvas.height / 2 - paddleHeight / 2;
+var leftPaddleY = canvas.height / 2 - paddleHeightleft / 2;
+var rightPaddleY = canvas.height / 2 - paddleHeightright / 2;
 var paddleSpeed = 10;
 
 // Define score properties
@@ -88,23 +89,16 @@ function update() {
   // Move paddles
   if (upPressed && rightPaddleY > 0) {
     rightPaddleY -= paddleSpeed;
-  } else if (downPressed && rightPaddleY + paddleHeight < canvas.height) {
+  } else if (downPressed && rightPaddleY + paddleHeightright < canvas.height) {
     rightPaddleY += paddleSpeed;
   }
 
   // Move right paddle based on "w" and "s" keys
   if (wPressed && leftPaddleY > 0) {
     leftPaddleY -= paddleSpeed;
-  } else if (sPressed && leftPaddleY + paddleHeight < canvas.height) {
+  } else if (sPressed && leftPaddleY + paddleHeightleft < canvas.height) {
     leftPaddleY += paddleSpeed;
   }
-
-  // Move right paddle automatically based on ball position
-  // if (ballY > rightPaddleY + paddleHeight / 2) {
-  //   rightPaddleY += paddleSpeed;
-  // } else if (ballY < rightPaddleY + paddleHeight / 2) {
-  //   rightPaddleY -= paddleSpeed;
-  // }
 
   // Move ball
   ballX += ballSpeedX;
@@ -119,7 +113,7 @@ function update() {
   if (
     ballX - ballRadius < paddleWidth &&
     ballY > leftPaddleY &&
-    ballY < leftPaddleY + paddleHeight
+    ballY < leftPaddleY + paddleHeightleft
   ) {
     ballSpeedX = -ballSpeedX;
   }
@@ -128,7 +122,7 @@ function update() {
   if (
     ballX + ballRadius > canvas.width - paddleWidth &&
     ballY > rightPaddleY &&
-    ballY < rightPaddleY + paddleHeight
+    ballY < rightPaddleY + paddleHeightright
   ) {
     ballSpeedX = -ballSpeedX;
   }
@@ -157,12 +151,21 @@ function playerWin(player) {
   reset();
 }
 
-// Reset ball to center of screen
+// Reset ball and paddles to center of screen
 function reset() {
   ballX = canvas.width / 2;
   ballY = canvas.height / 2;
   ballSpeedX = -ballSpeedX;
   ballSpeedY = Math.random() * 10 - 5;
+
+  // Reduce paddle height of the losing side
+  if (leftPlayerScore > rightPlayerScore) {
+    paddleHeightright = Math.max(paddleHeightright - 5, 10); // Ensure minimum paddle height
+    leftPaddleY = Math.min(leftPaddleY + 2.5, canvas.height - paddleHeightright); // Adjust paddle position
+  } else {
+    paddleHeightleft = Math.max(paddleHeightleft - 5, 10); // Ensure minimum paddle height
+    rightPaddleY = Math.min(rightPaddleY + 2.5, canvas.height - paddleHeightleft); // Adjust paddle position
+  }
 }
 
 // Draw objects on canvas
@@ -187,10 +190,10 @@ function draw() {
   ctx.closePath();
 
   // Draw left paddle
-  ctx.fillRect(0, leftPaddleY, paddleWidth, paddleHeight);
+  ctx.fillRect(0, leftPaddleY, paddleWidth, paddleHeightleft);
 
   // Draw right paddle
-  ctx.fillRect(canvas.width - paddleWidth, rightPaddleY, paddleWidth, paddleHeight);
+  ctx.fillRect(canvas.width - paddleWidth, rightPaddleY, paddleWidth, paddleHeightright);
 
   // Draw scores
   ctx.fillText("Score: " + leftPlayerScore, 10, 20);
